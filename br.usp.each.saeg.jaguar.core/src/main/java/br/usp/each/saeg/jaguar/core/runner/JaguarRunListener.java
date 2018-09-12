@@ -51,8 +51,13 @@ public class JaguarRunListener extends RunListener {
 			jaguar.collect(dataStore, currentTestFailed);
 			logger.debug("Time to collect data: {}", System.currentTimeMillis() - startTime);
 			
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Exception during collecting coverage information :" + e.toString());
+			logger.error("Exception Message : " + e.getMessage());
+			logger.error("Stacktrace :");
+			e.printStackTrace(System.err);
+			System.exit(1);
+			// e.printStackTrace();
 		}
 	}
 

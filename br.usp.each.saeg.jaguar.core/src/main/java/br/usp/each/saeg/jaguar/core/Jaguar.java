@@ -67,7 +67,7 @@ public class Jaguar {
 
 		classFilesCache = new HashMap<String, File>();
 		populateClassFilesCache(classesDir, "");
-		logger.debug("ClassFilesCache size = {}", classFilesCache.size());
+		logger.trace("ClassFilesCache size = {}", classFilesCache.size());
 	}
 
 	private void populateClassFilesCache(File dir, String path) {
@@ -81,7 +81,7 @@ public class Jaguar {
 			} else if (file.getName().endsWith(".class")) {
 				String className = path + StringUtils.removeEnd(file.getName(), ".class");
 				classFilesCache.put(className, file);
-				logger.debug("Added {} to classFilesCache", className);
+				// logger.trace("Added {} to classFilesCache", className);
 			}
 		}
 	}
@@ -96,12 +96,15 @@ public class Jaguar {
 	 * @throws IOException
 	 * 
 	 */
-	public void collect(final AbstractExecutionDataStore executionData, boolean currentTestFailed) throws IOException {
+	public void collect(final AbstractExecutionDataStore executionData, boolean currentTestFailed) throws Exception {
 		logger.debug("Test # {}", nTests);
 		if (executionData instanceof DataFlowExecutionDataStore) {
+			logger.trace("Collecting DF coverage");
 
 			long startTime = System.currentTimeMillis();
 			DuaCoverageBuilder duaCoverageBuilder = new DuaCoverageBuilder();
+			logger.trace("DUA coverage built");
+
 			AbstractAnalyzer analyzer = new DataflowAnalyzer(executionData, duaCoverageBuilder);
 			analyzeCoveredClasses(executionData, analyzer);
 			logger.debug("Time to analyze DF data: {}", System.currentTimeMillis() - startTime);
@@ -112,6 +115,7 @@ public class Jaguar {
 					.getClasses().size());
 
 		} else if (executionData instanceof ControlFlowExecutionDataStore) {
+			logger.trace("Collecting CF coverage");
 
 			long startTime = System.currentTimeMillis();
 			CoverageBuilder coverageBuilder = new CoverageBuilder();
@@ -130,20 +134,45 @@ public class Jaguar {
 
 	}
 
-	private void analyzeCoveredClasses(AbstractExecutionDataStore executionData, AbstractAnalyzer analyzer) {
+	private void analyzeCoveredClasses(AbstractExecutionDataStore executionData, AbstractAnalyzer analyzer) throws Exception {
+		logger.trace("Analyzing covered classes");
+
 		Collection<File> classFiles = classFilesOfStore(executionData);
+		logger.trace("Class files size = {}", classFiles.size());
+
 		for (File classFile : classFiles) {
-			try (InputStream inputStream = new FileInputStream(classFile)) {
+			logger.trace("Analyzing class {}", classFile.getPath());
+			InputStream inputStream = new FileInputStream(classFile);
+
+			try {
 				analyzer.analyzeClass(inputStream, classFile.getPath());
-			} catch (IOException e) {
-				logger.warn("Exception during analysis of file " + classFile.getAbsolutePath(), e);
 			}
+			catch (Throwable e) {
+				logger.error("Exception when analyzing covered classes: " + e.toString());
+				logger.error("Stacktrace :");
+				e.printStackTrace(System.err);
+				System.exit(1);
+			}
+			
+
+			// try (InputStream inputStream = new FileInputStream(classFile)) {
+			// 	analyzer.analyzeClass(inputStream, classFile.getPath());
+			// } catch (Exception e) {
+			// 	logger.warn("Exception during analysis of file " + classFile.getAbsolutePath(), e);
+			// }
 		}
 	}
 
 	private Collection<File> classFilesOfStore(AbstractExecutionDataStore executionDataStore) {
+		logger.trace("Class files of store");
+
 		Collection<File> result = new ArrayList<File>();
-		for (ControlFlowExecutionData data : executionDataStore.getContents()) {
+
+		// TODO: create abstract FlowExecutionData so ControlFlow and DataFlow can extend
+		Collection<ControlFlowExecutionData> contents = executionDataStore.getContents();
+		logger.trace("ControlFlowExecutionData contents size = {}", contents.size());
+
+		for (ControlFlowExecutionData data : contents) {
 			String vmClassName = data.getName();
 			File classFile = classFilesCache.get(vmClassName);
 			if (classFile != null) {
