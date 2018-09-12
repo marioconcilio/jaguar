@@ -56,11 +56,6 @@
 			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-		    <groupId>br.usp.each.saeg</groupId>
-    		<artifactId>org.jacoco.core</artifactId>
-   			<version>0.7.6</version>
-		</dependency>
 	</dependencies>
 	
 	<build>
@@ -70,7 +65,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>br.usp.each.saeg.jaguar.core.cli.JaguarRunner4Cli</mainClass>
+							<mainClass>br.usp.each.saeg.jaguar.core.cli.JaguarRunner</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
