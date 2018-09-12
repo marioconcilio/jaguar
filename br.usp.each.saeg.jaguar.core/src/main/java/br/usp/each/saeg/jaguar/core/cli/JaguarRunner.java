@@ -6,8 +6,10 @@ import java.util.Arrays;
 import org.junit.runner.JUnitCore;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 import br.usp.each.saeg.jaguar.core.JaCoCoClient;
 import br.usp.each.saeg.jaguar.core.Jaguar;
@@ -22,7 +24,7 @@ import br.usp.each.saeg.jaguar.core.utils.FileUtils;
 public class JaguarRunner {
 
 	private final JUnitCore junit = new JUnitCore();
-	private static Logger logger = LoggerFactory.getLogger("JaguarLogger");
+	private static Logger logger = (Logger) LoggerFactory.getLogger("JaguarLogger");
 	
 	private final Heuristic heuristic;
 	private final File projectDir;
@@ -46,6 +48,7 @@ public class JaguarRunner {
 
 	private void run() throws Exception {
 		final Class<?>[] classes = FileUtils.findTestClasses(testDir);
+		logger.trace("Total test classes = {}", classes.length);
 
 		final Jaguar jaguar = new Jaguar(sourceDir);
 		final JaCoCoClient client = new JaCoCoClient(isDataFlow);
@@ -55,6 +58,8 @@ public class JaguarRunner {
 		junit.run(classes);
 
 		client.close();
+
+		logger.trace("Generating XML");
 		if (outputType.equals("H")) {
 			jaguar.generateHierarchicalXML(heuristic, projectDir, outputFile);
 		} else {
@@ -79,7 +84,9 @@ public class JaguarRunner {
 			parser.printUsage(System.err);
 			System.exit(0);	
         }
-        
+		
+		setLogLevel(options.getLogLevel());
+
 		try {
 			logger.info(options.toString());
 			new JaguarRunner(options.getHeuristic(), options.getProjectPath(), options.getSourcePath(), options.getTestPath(),
@@ -94,6 +101,41 @@ public class JaguarRunner {
 		
 		logger.info("Jaguar has finished!");
 		System.exit(0);
+	}
+
+	private static void setLogLevel(String logLevel) {
+		Level level;
+
+		switch (logLevel) {
+			case "ALL":
+				level = Level.ALL;
+				break;
+
+			case "TRACE":
+				level = Level.TRACE;
+				break;
+
+			case "DEBUG":
+				level = Level.DEBUG;
+				break;
+
+			case "INFO": 
+				level = Level.INFO;
+				break;
+
+			case "WARN":
+				level = Level.WARN;
+				break;
+
+			case "ERROR":
+				level = Level.ERROR; 
+				break;
+
+			default:
+				level = Level.OFF;
+		}
+
+		logger.setLevel(level);
 	}
 
 }
