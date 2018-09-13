@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -83,6 +84,31 @@ public class FileUtils {
 		List<File> testClassFiles = findFilesEndingWith(testDir, new String[] { "Test.class", "Tests.class" });
 		List<Class<?>> classes = convertToClasses(testClassFiles, testDir);
 		return classes.toArray(new Class[classes.size()]);
+	}
+
+	/**
+	 * Search recursively for classes with annotated Test methods.
+	 * 
+	 * @param testDir the directory to be searched
+	 * @return list of files to search for annotated Test methods
+	 * @throws ClassNotFoundException
+	 */
+	public static Class<?>[] findAnnotatedTestClasses(File testDir) throws ClassNotFoundException {
+		final List<File> testClassFiles = findFilesEndingWith(testDir, new String[] { ".class" });
+		final List<Class<?>> classes = convertToClasses(testClassFiles, testDir);
+		final List<Class<?>> testClasses = new ArrayList<>();
+
+		for (final Class<?> clazz : classes) {
+			final Method[] methods = clazz.getDeclaredMethods();
+
+			for (final Method method : methods) {
+				if (method.isAnnotationPresent(org.junit.Test.class)) {
+					testClasses.add(clazz);
+				}
+			}
+		}
+
+		return testClasses.toArray(new Class[testClasses.size()]);
 	}
 
 	/**

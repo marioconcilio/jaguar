@@ -2,6 +2,7 @@ package br.usp.each.saeg.jaguar.core.cli;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.runner.JUnitCore;
 import org.kohsuke.args4j.CmdLineException;
@@ -47,8 +48,15 @@ public class JaguarRunner {
 	}
 
 	private void run() throws Exception {
-		final Class<?>[] classes = FileUtils.findTestClasses(testDir);
-		logger.trace("Total test classes = {}", classes.length);
+		final Class<?>[] testClasses = FileUtils.findTestClasses(testDir);
+		logger.trace("Total classes ending with Test or Tests = {}", testClasses.length);
+
+		final Class<?>[] annotatedClasses = FileUtils.findAnnotatedTestClasses(testDir);
+		logger.trace("Total annotated test classes = {}", annotatedClasses.length);
+
+		Class<?>[] classes = Stream.of(testClasses, annotatedClasses)
+			.flatMap(Stream::of)
+			.toArray(Class<?>[]::new);
 
 		final Jaguar jaguar = new Jaguar(sourceDir);
 		final JaCoCoClient client = new JaCoCoClient(isDataFlow);
@@ -67,7 +75,9 @@ public class JaguarRunner {
 		}
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
+		logger.info("Welcome to Jaguar CLI!");
+
 		final JaguarRunnerOptions options = new JaguarRunnerOptions();
 		final CmdLineParser parser = new CmdLineParser(options);
 		
@@ -93,7 +103,6 @@ public class JaguarRunner {
 					         options.getDataFlow(), options.getOutputFileName(), options.getOutputType()).run();
 		} catch (Exception e) {
 			logger.error("Exception :" + e.toString());
-			logger.error("Exception Message : " + e.getMessage());
 			logger.error("Stacktrace :");
 			e.printStackTrace(System.err);
 			System.exit(1);
@@ -106,7 +115,7 @@ public class JaguarRunner {
 	private static void setLogLevel(String logLevel) {
 		Level level;
 
-		switch (logLevel) {
+		switch (logLevel.toUpperCase()) {
 			case "ALL":
 				level = Level.ALL;
 				break;
