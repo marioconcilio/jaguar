@@ -1,25 +1,21 @@
 package br.usp.each.saeg.jaguar.core.cli;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.usp.each.saeg.jaguar.core.heuristic.Heuristic;
-import br.usp.each.saeg.jaguar.core.heuristic.TarantulaHeuristic;
 
 /**
  * Class to represent the Command Line Interface (CLI) options
  * and respective descriptions.
  * 
- * @author Henrique Ribeiro
+ * @author Mario Concilio
  *
  */
 public class JaguarRunnerOptions {
 
-	private static Logger logger = LoggerFactory.getLogger("JaguarLogger");
-    private Heuristic heuristic = new TarantulaHeuristic();
+	private File sourcePath;
+	private File testPath;
    
     @Option(name = "--help", help = true,
     		usage = "show this help message")
@@ -40,43 +36,49 @@ public class JaguarRunnerOptions {
     
     @Option(name = "--projectDir", aliases = {"-p"}, required = true,
     		usage = "the path where the project is located")
-    private File projectPath = new File("");
-    
-    @Option(name = "--classesDir", aliases = {"-c"},
-            usage = "the path where the compiled classes are located\n")
-	private File sourcePath = new File(".\\target\\classes\\");
-	
-    @Option(name = "--testsDir", aliases = {"-t", "-td"},
-            usage = "the path where the compiled tests are located\n")
-	private File testPath = new File(".\\target\\test-classes\\");
-	
-    @Option(name = "--testsListFile", aliases = {"-tf"},
+	private File projectPath = new File("");
+
+	@Option(name = "--testsListFile", aliases = {"-tf"},
             usage = "the file containing the list of tests\n")
 	private File testListFile = new File("\\temp\\junittempfilename.txt");
+	
+	@Option(name = "--testSuite", aliases = {"-s"},
+			usage = "the test suite to run")
+	private String testSuite;
     
     @Option(name = "--logLevel", aliases = {"-l"}, 
     		usage = "the log level\n ERROR, INFO, DEBUG, TRACE")
     private String logLevel = "INFO";
+    
+    public JaguarRunnerOptions() {
+    	sourcePath = Paths.get(projectPath.getAbsolutePath(), "target", "classes").toFile();
+    	testPath = Paths.get(projectPath.getAbsolutePath(), "target", "test-classes").toFile();
+    }
     
     @Option(name = "--heuristic", aliases = {"-h"},
     		usage = "heuristic name\n"
     				+ "must be one of the heuristic in the package br.usp.each.saeg.jaguar.core.heuristic\n"
     				+ "must be the exact name of the class without the word Heuristic\n"
 		    		+ "default is Tarantura")
-    public void setHeuristic(String heuristic){
-		try {
-			this.heuristic = (Heuristic) Class.forName(
-					"br.usp.each.saeg.jaguar.core.heuristic." + heuristic + "Heuristic").newInstance();
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
+    private String heuristic = "Tarantula";
+    
+    @Option(name = "--classesDir", aliases = {"-c"},
+            usage = "the path where the compiled classes are located relative to project root\n")
+    public void setSourcePath(String path) {
+    	this.sourcePath = new File(projectPath, path);
     }
+    
+    @Option(name = "--testsDir", aliases = {"-t", "-td"},
+            usage = "the path where the compiled tests are located relative to project root\n")
+    public void setTestPath(String path) {
+    	this.testPath = new File(projectPath, path);
+	}
     
     public Boolean isHelp() {
 		return help;
 	}
 
-    public Heuristic getHeuristic() {
+    public String getHeuristic() {
 		return heuristic;
 	}
 
@@ -91,7 +93,7 @@ public class JaguarRunnerOptions {
 	public File getTestPath() {
 		return testPath;
 	}
-	
+
 	public File getTestListFile() {
 		return testListFile;
 	}
@@ -103,15 +105,19 @@ public class JaguarRunnerOptions {
 	public String getOutputType() {
 		return outputType;
 	}
+
+	public String getTestSuite() {
+		return testSuite;
+	}
 	
-	public Boolean getDataFlow() {
+	public Boolean isDataFlow() {
 		return dataFlow;
 	}
 	
 	public String getLogLevel() {
 		return logLevel;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "JaguarRunnerOptions \n"
@@ -120,6 +126,7 @@ public class JaguarRunnerOptions {
 				+ "projectPath = " + projectPath.getPath() + "\n"
 				+ "sourcePath = " + sourcePath.getPath() + "\n"
 				+ "testPath = " + testPath.getPath() + "\n"
+				+ "testSuite = " + testSuite + "\n"
 				+ "testListFile = " + testListFile.getPath() + "\n"
 				+ "output = " + outputFileName + "\n"
 				+ "outputType = " + outputType + "\n"

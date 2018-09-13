@@ -34,9 +34,10 @@ public class JaguarRunner {
 	private final Boolean isDataFlow;
 	private final String outputFile;
 	private final String outputType;
+	private final String testSuite;
 	
 	public JaguarRunner(Heuristic heuristic, File projectDir, File sourceDir,
-			File testDir, Boolean isDataFlow, String outputFile, String outputType) {
+			File testDir, String testSuite, Boolean isDataFlow, String outputFile, String outputType) {
 		super();
 		this.heuristic = heuristic;
 		this.projectDir = projectDir;
@@ -45,18 +46,36 @@ public class JaguarRunner {
 		this.isDataFlow = isDataFlow;
 		this.outputFile = outputFile;
 		this.outputType = outputType;
+		this.testSuite = testSuite;
 	}
 
 	private void run() throws Exception {
-		final Class<?>[] testClasses = FileUtils.findTestClasses(testDir);
-		logger.trace("Total classes ending with Test or Tests = {}", testClasses.length);
+		Class<?> suiteClass = null;
+		if (testSuite != null && !testSuite.isEmpty()) {
+			try {
+				suiteClass = Class.forName(testSuite);
+			}
+			catch (ClassNotFoundException e) {
+				logger.warn("Test suite class {} not found. Runnning all tests in test folder", testSuite);
+			}
+		}
 
-		final Class<?>[] annotatedClasses = FileUtils.findAnnotatedTestClasses(testDir);
-		logger.trace("Total annotated test classes = {}", annotatedClasses.length);
-
-		Class<?>[] classes = Stream.of(testClasses, annotatedClasses)
-			.flatMap(Stream::of)
-			.toArray(Class<?>[]::new);
+		Class<?>[] classes;
+		if (suiteClass == null) {
+			final Class<?>[] testClasses = FileUtils.findTestCaseClasses(testDir);
+			logger.debug("Total TestCase classes = {}", testClasses.length);
+	
+			final Class<?>[] annotatedClasses = FileUtils.findAnnotatedTestClasses(testDir);
+			logger.debug("Total annotated test classes = {}", annotatedClasses.length);
+	
+			classes = Stream.of(testClasses, annotatedClasses)
+				.flatMap(Stream::of)
+				.toArray(Class<?>[]::new);
+		}
+		else {
+			logger.debug("Running test suite = {}", suiteClass);
+			classes = new Class<?>[] { suiteClass };
+		}
 
 		final Jaguar jaguar = new Jaguar(sourceDir);
 		final JaCoCoClient client = new JaCoCoClient(isDataFlow);
@@ -99,9 +118,12 @@ public class JaguarRunner {
 
 		try {
 			logger.info(options.toString());
-			new JaguarRunner(options.getHeuristic(), options.getProjectPath(), options.getSourcePath(), options.getTestPath(),
-					         options.getDataFlow(), options.getOutputFileName(), options.getOutputType()).run();
-		} catch (Exception e) {
+			Heuristic heuristic = (Heuristic) Class.forName("br.usp.each.saeg.jaguar.core.heuristic." + options.getHeuristic() + "Heuristic").newInstance();
+
+			new JaguarRunner(heuristic, options.getProjectPath(), options.getSourcePath(), options.getTestPath(), options.getTestSuite(),
+					         options.isDataFlow(), options.getOutputFileName(), options.getOutputType()).run();
+		}
+		catch (Exception e) {
 			logger.error("Exception :" + e.toString());
 			logger.error("Stacktrace :");
 			e.printStackTrace(System.err);

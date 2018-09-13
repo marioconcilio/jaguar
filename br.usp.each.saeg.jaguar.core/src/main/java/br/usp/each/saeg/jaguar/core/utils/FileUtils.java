@@ -14,6 +14,8 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 /**
  * Provides utilies methods that can be used to search and list files within a
  * directory.
@@ -87,6 +89,28 @@ public class FileUtils {
 	}
 
 	/**
+	 * Search recursively for classes that extends junit.framework.TestCase
+	 * For JUnit 3
+	 * 
+	 * @param testDir the directory to be searched
+	 * @return list of files extenting TestCase
+	 * @throws ClassNotFoundException
+	 */
+	public static Class<?>[] findTestCaseClasses(File testDir) throws ClassNotFoundException {
+		final List<File> testClassFiles = findFilesEndingWith(testDir, new String[] { ".class" });
+		final List<Class<?>> classes = convertToClasses(testClassFiles, testDir);
+		final List<Class<?>> testClasses = new ArrayList<>();
+
+		for (Class<?> clazz : classes) {
+			if (clazz != null && TestCase.class.isAssignableFrom(clazz)) {
+				testClasses.add(clazz);
+			}
+		}
+
+		return testClasses.toArray(new Class[testClasses.size()]);
+	}
+
+	/**
 	 * Search recursively for classes with annotated Test methods.
 	 * 
 	 * @param testDir the directory to be searched
@@ -125,7 +149,7 @@ public class FileUtils {
 		List<Class<?>> classes = new ArrayList<Class<?>>();
 		for (File file : classFiles) {
 			Class<?> c = Class.forName(getClassNameFromFile(classesDir, file));
-			if (!Modifier.isAbstract(c.getModifiers())) {
+			if (c.getEnclosingClass() == null && !Modifier.isAbstract(c.getModifiers())) {
 				classes.add(c);
 			}
 		}
