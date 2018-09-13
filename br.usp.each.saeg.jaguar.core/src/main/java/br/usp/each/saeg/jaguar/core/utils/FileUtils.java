@@ -80,7 +80,7 @@ public class FileUtils {
 	 * @throws ClassNotFoundException
 	 */
 	public static Class<?>[] findTestClasses(File testDir) throws ClassNotFoundException {
-		List<File> testClassFiles = findFilesEndingWith(testDir, new String[] { "Test.class" });
+		List<File> testClassFiles = findFilesEndingWith(testDir, new String[] { "Test.class", "Tests.class" });
 		List<Class<?>> classes = convertToClasses(testClassFiles, testDir);
 		return classes.toArray(new Class[classes.size()]);
 	}
