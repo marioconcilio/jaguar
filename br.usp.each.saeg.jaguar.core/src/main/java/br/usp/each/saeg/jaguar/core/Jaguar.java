@@ -81,7 +81,6 @@ public class Jaguar {
 			} else if (file.getName().endsWith(".class")) {
 				String className = path + StringUtils.removeEnd(file.getName(), ".class");
 				classFilesCache.put(className, file);
-				// logger.trace("Added {} to classFilesCache", className);
 			}
 		}
 	}
