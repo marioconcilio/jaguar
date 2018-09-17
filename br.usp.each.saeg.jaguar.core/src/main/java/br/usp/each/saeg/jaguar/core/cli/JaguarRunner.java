@@ -56,7 +56,7 @@ public class JaguarRunner {
 				suiteClass = Class.forName(testSuite);
 			}
 			catch (ClassNotFoundException e) {
-				logger.warn("Test suite class {} not found. Runnning all tests in test folder", testSuite);
+				logger.warn("Test suite class {} not found. Running all tests in test folder", testSuite);
 			}
 		}
 
@@ -101,7 +101,7 @@ public class JaguarRunner {
 		final CmdLineParser parser = new CmdLineParser(options);
 		
         try {
-        	logger.info("Command:" + Arrays.toString(args));
+        	logger.debug("Command:" + Arrays.toString(args));
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
             System.err.println(e.getLocalizedMessage());

@@ -43,7 +43,8 @@ public class JaguarRunnerOptions {
 	private File testListFile = new File("\\temp\\junittempfilename.txt");
 	
 	@Option(name = "--testSuite", aliases = {"-s"},
-			usage = "the test suite to run")
+			usage = "the test suite to run\n" +
+					"if a test suite is specified, Jaguar runs it instead of all classes in testDir")
 	private String testSuite;
     
     @Option(name = "--logLevel", aliases = {"-l"}, 
@@ -58,8 +59,7 @@ public class JaguarRunnerOptions {
     @Option(name = "--heuristic", aliases = {"-h"},
     		usage = "heuristic name\n"
     				+ "must be one of the heuristic in the package br.usp.each.saeg.jaguar.core.heuristic\n"
-    				+ "must be the exact name of the class without the word Heuristic\n"
-		    		+ "default is Tarantura")
+    				+ "must be the exact name of the class without the word Heuristic")
     private String heuristic = "Tarantula";
     
     @Option(name = "--classesDir", aliases = {"-c"},
@@ -122,12 +122,11 @@ public class JaguarRunnerOptions {
 	public String toString() {
 		return "JaguarRunnerOptions \n"
 				+ "help = " + help + "\n"
-				+ "heuristic = " + heuristic.getClass().getName() + "\n"
+				+ "heuristic = " + heuristic + "\n"
 				+ "projectPath = " + projectPath.getPath() + "\n"
 				+ "sourcePath = " + sourcePath.getPath() + "\n"
 				+ "testPath = " + testPath.getPath() + "\n"
 				+ "testSuite = " + testSuite + "\n"
-				+ "testListFile = " + testListFile.getPath() + "\n"
 				+ "output = " + outputFileName + "\n"
 				+ "outputType = " + outputType + "\n"
 				+ "logLevel = " + logLevel + "\n"

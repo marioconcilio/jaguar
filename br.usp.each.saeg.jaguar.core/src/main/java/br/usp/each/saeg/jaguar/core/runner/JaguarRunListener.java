@@ -1,7 +1,5 @@
 package br.usp.each.saeg.jaguar.core.runner;
 
-import java.io.IOException;
-
 import org.jacoco.core.data.AbstractExecutionDataStore;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
@@ -27,19 +25,19 @@ public class JaguarRunListener extends RunListener {
 	}
 
 	@Override
-	public void testStarted(Description description) throws Exception {
+	public void testStarted(Description description) {
 		currentTestFailed = false;
 		jaguar.increaseNTests();
 	}
 
 	@Override
-	public void testFailure(Failure failure) throws Exception {
+	public void testFailure(Failure failure) {
 		currentTestFailed = true;
 		jaguar.increaseNTestsFailed();
 	}
 
 	@Override
-	public void testFinished(Description description) throws Exception {
+	public void testFinished(Description description) {
 		printTestResult(description);
  		try {
  			
@@ -54,7 +52,7 @@ public class JaguarRunListener extends RunListener {
 		} catch (Exception e) {
 			logger.error("Exception during collecting coverage information :" + e.toString());
 			logger.error("Exception Message : " + e.getMessage());
-			logger.error("Stacktrace :");
+			logger.error("Stacktrace: ");
 			e.printStackTrace(System.err);
 			System.exit(1);
 			// e.printStackTrace();
