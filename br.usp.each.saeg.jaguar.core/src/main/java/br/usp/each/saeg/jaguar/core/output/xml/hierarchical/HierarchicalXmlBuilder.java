@@ -3,70 +3,24 @@ package br.usp.each.saeg.jaguar.core.output.xml.hierarchical;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.usp.each.saeg.jaguar.codeforest.model.*;
+import br.usp.each.saeg.jaguar.codeforest.model.Class;
+import br.usp.each.saeg.jaguar.codeforest.model.Package;
+import br.usp.each.saeg.jaguar.core.output.xml.XmlBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.usp.each.saeg.jaguar.codeforest.model.Class;
-import br.usp.each.saeg.jaguar.codeforest.model.DuaRequirement;
-import br.usp.each.saeg.jaguar.codeforest.model.HierarchicalFaultClassification;
-import br.usp.each.saeg.jaguar.codeforest.model.LineRequirement;
-import br.usp.each.saeg.jaguar.codeforest.model.Method;
-import br.usp.each.saeg.jaguar.codeforest.model.Package;
-import br.usp.each.saeg.jaguar.codeforest.model.Requirement;
-import br.usp.each.saeg.jaguar.codeforest.model.SuspiciousElement;
-import br.usp.each.saeg.jaguar.core.heuristic.Heuristic;
 import br.usp.each.saeg.jaguar.core.model.core.requirement.AbstractTestRequirement;
 import br.usp.each.saeg.jaguar.core.model.core.requirement.DuaTestRequirement;
 import br.usp.each.saeg.jaguar.core.model.core.requirement.LineTestRequirement;
 
-public class HierarchicalXmlBuilder {
+public class HierarchicalXmlBuilder extends XmlBuilder {
 
 	private static Logger logger = LoggerFactory.getLogger("JaguarLogger");
 
 	private Integer methodPosition = 1;
-	private String project;
-	private Heuristic heuristic;
-	private Requirement.Type requirementType;
-	private Long timeSpent;
-
-	private Integer absolutePosition = 1;
-	private Integer tiedPosition = 1;
-	private Double previousSuspicious = 1D;
-	
 	private Map<Integer, Package> packageMap = new HashMap<Integer, Package>();
-
-	public HierarchicalXmlBuilder() {
-		super();
-	}
-
-	/**
-	 * Set the project name.
-	 */
-	public void project(String project) {
-		this.project = project;
-	}
-
-	/**
-	 * Set the Heuristic used to calculate the suspicious value.
-	 */
-	public void heuristic(Heuristic heuristic) {
-		this.heuristic = heuristic;
-	}
-
-	/**
-	 * Set the type of requirement (e.g Line, Node, Dua)
-	 */
-	public void requirementType(Requirement.Type requirementType) {
-		this.requirementType = requirementType;
-	}
-	
-	/**
-	 * Set the total time spent to calculate everything.
-	 */
-	public void timeSpent(Long timeSpent) {
-		this.timeSpent = timeSpent;
-	}
 
 	/**
 	 * Add the test requirement to the code forest structure.
@@ -119,8 +73,7 @@ public class HierarchicalXmlBuilder {
 		if (currentClass == null) {
 			currentClass = new Class();
 			currentClass.setName(className);
-			currentClass.setLocation(new Integer(testRequirement
-					.getClassFirstLine()));
+			currentClass.setLocation(new Integer(testRequirement.getClassFirstLine()));
 			pakkage.getClasses().add(currentClass);
 		}
 		return currentClass;
@@ -218,17 +171,6 @@ public class HierarchicalXmlBuilder {
 			logger.error("Unknown TestRequirement, it will not be added to HierarchicalXmlBuilder - {}", testRequirement.toString());
 		}
 	}
-	
-	private Integer getPosition(double currentSuspicious) {
-		if (previousSuspicious.equals(currentSuspicious)){
-			absolutePosition++;
-		}else{
-			previousSuspicious = currentSuspicious;
-			tiedPosition = absolutePosition++;
-		}
-		return tiedPosition;
-	}
-
 
 	/**
 	 * Replace '\' by '.'. and remove last word (the class name).
@@ -249,10 +191,11 @@ public class HierarchicalXmlBuilder {
 	/**
 	 * Create the object used to generate the CodeForest xml.
 	 */
+	@Override
 	public HierarchicalFaultClassification build() {
 
 		for (Package currentPackage : packageMap.values()) {
-			setSuspicous(currentPackage);
+			setSuspicious(currentPackage);
 		}
 
 		HierarchicalFaultClassification faultClassification = new HierarchicalFaultClassification();
@@ -275,9 +218,9 @@ public class HierarchicalXmlBuilder {
 	 * 
 	 * @param element
 	 */
-	private void setSuspicous(SuspiciousElement element) {
+	private void setSuspicious(SuspiciousElement element) {
 		for (SuspiciousElement child : element.getChildren()) {
-			setSuspicous(child);
+			setSuspicious(child);
 			element.updateSupicousness(child.getSuspiciousValue(),
 					child.getNumber());
 		}
