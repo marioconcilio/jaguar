@@ -1,0 +1,10 @@
+jfreechart/
+closure/
+commons-lang/
+commons-math/
+mockito/
+time/
+
+output-*
+
+*.jar
