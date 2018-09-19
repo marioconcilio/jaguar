@@ -24,8 +24,7 @@ java -javaagent:$JACOCO_JAR=output=tcpserver -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
 		--logLevel "$LOG_LEVEL" \
 		--projectDir "$PROJECT_DIR" \
 		--classesDir "$CLASSES_DIR" \
-		--testsDir "$TESTS_DIR" \
-		--testSuite "$TEST_SUITE"
+		--testsDir "$TESTS_DIR"
 
 # DATA-FLOW
 
@@ -38,5 +37,4 @@ java -javaagent:$JACOCO_JAR=output=tcpserver,dataflow=true -cp .:$CP:$JAGUAR_JAR
 		--logLevel "$LOG_LEVEL" \
 		--projectDir "$PROJECT_DIR" \
 		--classesDir "$CLASSES_DIR" \
-		--testsDir "$TESTS_DIR" \
-		--testSuite "$TEST_SUITE"
+		--testsDir "$TESTS_DIR"

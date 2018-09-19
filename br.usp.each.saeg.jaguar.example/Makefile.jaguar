@@ -1,0 +1,35 @@
+JAGUAR_MAIN_CLASS=br.usp.each.saeg.jaguar.core.cli.JaguarRunner
+JAGUAR_JAR=br.usp.each.saeg.jaguar.core-1.0.0-jar-with-dependencies.jar
+JACOCO_JAR=jacocoagent.jar
+HEURISTIC=Ochiai
+LOG_LEVEL=DEBUG
+
+run_closure: PROJECT_DIR=closure
+run_closure: CLASSES_DIR=build/classes/
+run_closure: TESTS_DIR=build/test/
+run_closure: CP=$(shell defects4j export -p cp.test -w closure)
+
+# Run Jaguar control-flow and data-flow on Closure
+run_closure:
+	@echo Running Jaguar control-flow and data-flow on Closure
+
+	nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
+		$(JAGUAR_MAIN_CLASS) \
+			--heuristic "$(HEURISTIC)" \
+			--outputType H \
+			--output "data-flow.xml" \
+			--logLevel "$(LOG_LEVEL)" \
+			--projectDir "$(PROJECT_DIR)" \
+			--classesDir "$(CLASSES_DIR)" \
+			--testsDir "$(TESTS_DIR)" > output-closure-cf 2>&1 & echo $$!
+	
+	nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver,dataflow=true -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
+		$(JAGUAR_MAIN_CLASS) \
+			--dataflow \
+			--heuristic "$(HEURISTIC)" \
+			--outputType H \
+			--output "data-flow.xml" \
+			--logLevel "$(LOG_LEVEL)" \
+			--projectDir "$(PROJECT_DIR)" \
+			--classesDir "$(CLASSES_DIR)" \
+			--testsDir "$(TESTS_DIR)" > output-closure-df 2>&1 & echo $$!

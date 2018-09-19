@@ -1,9 +1,29 @@
-all: prepare projects
+all: install projects
 
-prepare:
+install: build install_jaguar
+	
+build:
 	cd .. && $(MAKE) prepare build_core
-	cp ../br.usp.each.saeg.jaguar.core/target/br.usp.each.saeg.jaguar.core-1.0.0-jar-with-dependencies.jar .
-	cp ../br.usp.each.saeg.jaguar.plugin/lib/jacocoagent.jar .
+
+install_jaguar:
+	@cp ../br.usp.each.saeg.jaguar.core/target/br.usp.each.saeg.jaguar.core-1.0.0-jar-with-dependencies.jar .
+	@cp ../br.usp.each.saeg.jaguar.plugin/lib/jacocoagent.jar .
+
+clean: clean_jar clean_output clean_projects
+
+clean_jaguar:
+	@rm br.usp.each.saeg.jaguar.core-1.0.0-jar-with-dependencies.jar jacocoagent.jar 2>/dev/null || true
+
+clean_output:
+	@rm output-* 2>/dev/null || true
+
+clean_projects:
+	@rm -rf jfreechart 2>/dev/null || true
+	@rm -rf closure 2>/dev/null || true
+	@rm -rf commons-lang 2>/dev/null || true
+	@rm -rf commons-math 2>/dev/null || true
+	@rm -rf mockito 2>/dev/null || true
+	@rm -rf time 2>/dev/null || true
 
 # Download, compile and run tests of all projects available in defects4j
 projects:
@@ -32,4 +52,4 @@ projects:
 	cd time && defects4j compile && defects4j test
 
 run_closure:
-	nohup nice time ./run_closure.sh > output-closure 2>&1 &
+	$(MAKE) -f Makefile.jaguar run_closure
