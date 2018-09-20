@@ -139,16 +139,10 @@ public class Jaguar {
 
 		for (File classFile : classFiles) {
 			logger.trace("Analyzing class {}", classFile.getPath());
-			InputStream inputStream = new FileInputStream(classFile);
 
-			try {
-				analyzer.analyzeClass(inputStream, classFile.getPath());
-			}
-			catch (Throwable e) {
-				logger.warn("Exception when analyzing covered classes: " + e.toString());
-				logger.warn("Stacktrace :");
-				e.printStackTrace(System.err);
-			}
+			InputStream inputStream = new FileInputStream(classFile);
+            analyzer.analyzeClass(inputStream, classFile.getPath());
+			inputStream.close();
 		}
 	}
 
