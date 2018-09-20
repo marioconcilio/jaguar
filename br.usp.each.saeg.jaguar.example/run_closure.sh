@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 
+#
 # Script to run jaguar on defects4j Closure
 #
 
@@ -16,7 +16,7 @@ LOG_LEVEL="DEBUG" # ALL / TRACE / DEBUG / INFO / WARN / ERROR
 
 # CONTROL-FLOW
 
-java -javaagent:$JACOCO_JAR=output=tcpserver -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
+nohup nice time java -javaagent:$JACOCO_JAR=output=tcpserver -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
 	$JAGUAR_MAIN_CLASS \
 		--heuristic "$HEURISTIC" \
 		--outputType H \
@@ -25,11 +25,11 @@ java -javaagent:$JACOCO_JAR=output=tcpserver -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
 		--projectDir "$PROJECT_DIR" \
 		--classesDir "$CLASSES_DIR" \
 		--testsDir "$TESTS_DIR" \
-		--testSuite "$TEST_SUITE" >& output-closure-cf &
+		--testSuite "$TEST_SUITE" >& output-closure-cf
 
 # DATA-FLOW
 
-java -javaagent:$JACOCO_JAR=output=tcpserver,dataflow=true -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
+nohup nice time java -javaagent:$JACOCO_JAR=output=tcpserver,dataflow=true -cp .:$CP:$JAGUAR_JAR:$JACOCO_JAR \
 	$JAGUAR_MAIN_CLASS \
 		--dataflow \
 		--heuristic "$HEURISTIC" \
@@ -39,4 +39,4 @@ java -javaagent:$JACOCO_JAR=output=tcpserver,dataflow=true -cp .:$CP:$JAGUAR_JAR
 		--projectDir "$PROJECT_DIR" \
 		--classesDir "$CLASSES_DIR" \
 		--testsDir "$TESTS_DIR" \
-		--testSuite "$TEST_SUITE" >& output-closure-df &
+		--testSuite "$TEST_SUITE" >& output-closure-df

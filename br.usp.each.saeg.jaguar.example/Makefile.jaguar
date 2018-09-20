@@ -2,34 +2,85 @@ JAGUAR_MAIN_CLASS=br.usp.each.saeg.jaguar.core.cli.JaguarRunner
 JAGUAR_JAR=br.usp.each.saeg.jaguar.core-1.0.0-jar-with-dependencies.jar
 JACOCO_JAR=jacocoagent.jar
 HEURISTIC=Ochiai
+OUTPUT_TYPE=H
 LOG_LEVEL=DEBUG
 
-run_closure: PROJECT_DIR=closure
-run_closure: CLASSES_DIR=build/classes/
-run_closure: TESTS_DIR=build/test/
-run_closure: CP=$(shell defects4j export -p cp.test -w closure)
+.PHONY:all
+all: jfreechart closure commons-math mockito jodatime
+
+# Run Jaguar control-flow and data-flow on JFreeChart
+jfreechart: PROJECT_DIR=jfreechart
+jfreechart: CLASSES_DIR=build/
+jfreechart: TESTS_DIR=build-tests/
+jfreechart: TEST_SUITE=
+jfreechart: CP=$(shell defects4j export -p cp.test -w jfreechart 2>/dev/null ||:)
+
+.PHONY:jfreechart
+jfreechart: run_controlflow run_dataflow
 
 # Run Jaguar control-flow and data-flow on Closure
-run_closure:
-	@echo Running Jaguar control-flow and data-flow on Closure
+closure: PROJECT_DIR=closure
+closure: CLASSES_DIR=build/classes/
+closure: TESTS_DIR=build/test/
+closure: TEST_SUITE=
+closure: CP=$(shell defects4j export -p cp.test -w closure 2>/dev/null ||:)
 
-	nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
+.PHONY:closure
+closure: run_controlflow run_dataflow
+
+# Run Jaguar control-flow and data-flow on Commons-Math
+commons-math: PROJECT_DIR=commons-math
+commons-math: CLASSES_DIR=target/classes/
+commons-math: TESTS_DIR=target/test-classes/
+commons-math: TEST_SUITE=
+commons-math: CP=$(shell defects4j export -p cp.test -w commons-math 2>/dev/null ||:)
+
+.PHONY:commons-math
+commons-math: run_controlflow run_dataflow
+
+# Run Jaguar control-flow and data-flow on Mockito
+mockito: PROJECT_DIR=mockito/
+mockito: CLASSES_DIR=build/classes/main/
+mockito: TESTS_DIR=build/classes/test/
+mockito: TEST_SUITE=
+mockito: CP=$(shell defects4j export -p cp.test -w mockito 2>/dev/null ||:)
+
+.PHONY:mockito
+mockito: run_controlflow run_dataflow
+
+# Run Jaguar control-flow and data-flow on JodaTime
+jodatime: PROJECT_DIR=jodatime/
+jodatime: CLASSES_DIR=target/classes/
+jodatime: TESTS_DIR=target/test-classes/
+jodatime: TEST_SUITE=org.joda.time.TestAllPackages
+jodatime: CP=$(shell defects4j export -p cp.test -w jodatime 2>/dev/null ||:)
+
+.PHONY:jodatime
+jodatime: run_controlflow run_dataflow
+
+.PHONY: run_controlflow
+run_controlflow:
+	@nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
 		$(JAGUAR_MAIN_CLASS) \
 			--heuristic "$(HEURISTIC)" \
-			--outputType H \
+			--outputType $(OUTPUT_TYPE) \
 			--output "data-flow.xml" \
 			--logLevel "$(LOG_LEVEL)" \
 			--projectDir "$(PROJECT_DIR)" \
 			--classesDir "$(CLASSES_DIR)" \
-			--testsDir "$(TESTS_DIR)" > output-closure-cf 2>&1 & echo $$!
-	
-	nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver,dataflow=true -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
+			--testsDir "$(TESTS_DIR)" \
+			--testSuite "$(TEST_SUITE)" > output-$(PROJECT_DIR)-cf 2>&1
+
+.PHONY:run_dataflow
+run_dataflow:
+	@nohup nice time java -javaagent:$(JACOCO_JAR)=output=tcpserver,dataflow=true -cp $(CP):$(JAGUAR_JAR):$(JACOCO_JAR) \
 		$(JAGUAR_MAIN_CLASS) \
 			--dataflow \
 			--heuristic "$(HEURISTIC)" \
-			--outputType H \
+			--outputType $(OUTPUT_TYPE) \
 			--output "data-flow.xml" \
 			--logLevel "$(LOG_LEVEL)" \
 			--projectDir "$(PROJECT_DIR)" \
 			--classesDir "$(CLASSES_DIR)" \
-			--testsDir "$(TESTS_DIR)" > output-closure-df 2>&1 & echo $$!
+			--testsDir "$(TESTS_DIR)" \
+			--testSuite "$(TEST_SUITE)" > output-$(PROJECT_DIR)-df 2>&1
