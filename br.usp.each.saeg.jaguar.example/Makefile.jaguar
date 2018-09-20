@@ -39,7 +39,7 @@ commons-math: CP=$(shell defects4j export -p cp.test -w commons-math 2>/dev/null
 commons-math: run_controlflow run_dataflow
 
 # Run Jaguar control-flow and data-flow on Mockito
-mockito: PROJECT_DIR=mockito/
+mockito: PROJECT_DIR=mockito
 mockito: CLASSES_DIR=build/classes/main/
 mockito: TESTS_DIR=build/classes/test/
 mockito: TEST_SUITE=
@@ -49,7 +49,7 @@ mockito: CP=$(shell defects4j export -p cp.test -w mockito 2>/dev/null ||:)
 mockito: run_controlflow run_dataflow
 
 # Run Jaguar control-flow and data-flow on JodaTime
-jodatime: PROJECT_DIR=jodatime/
+jodatime: PROJECT_DIR=jodatime
 jodatime: CLASSES_DIR=target/classes/
 jodatime: TESTS_DIR=target/test-classes/
 jodatime: TEST_SUITE=org.joda.time.TestAllPackages

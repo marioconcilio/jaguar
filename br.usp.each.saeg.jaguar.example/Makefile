@@ -80,6 +80,6 @@ commons-math:
 mockito:
 	@$(MAKE) -f Makefile.jaguar mockito &
 
-.PHONY:time
-time:
-	@$(MAKE) -f Makefile.jaguar time &
+.PHONY:jodatime
+jodatime:
+	@$(MAKE) -f Makefile.jaguar jodatime &
