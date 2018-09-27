@@ -28,6 +28,16 @@ closure: CP=$(shell defects4j export -p cp.test -w closure 2>/dev/null ||:)
 .PHONY:closure
 closure: run_controlflow run_dataflow
 
+# Run Jaguar control-flow and data-flow on Commons-Lang
+commons-lang: PROJECT_DIR=commons-lang
+commons-lang: CLASSES_DIR=target/classes/
+commons-lang: TESTS_DIR=target/tests/
+commons-lang: TEST_SUITE=
+commons-lang: CP=$(shell defects4j export -p cp.test -w commons-lang 2>/dev/null ||:)
+
+.PHONY:commons-lang
+commons-lang: run_controlflow run_dataflow
+
 # Run Jaguar control-flow and data-flow on Commons-Math
 commons-math: PROJECT_DIR=commons-math
 commons-math: CLASSES_DIR=target/classes/
@@ -64,7 +74,7 @@ run_controlflow:
 		$(JAGUAR_MAIN_CLASS) \
 			--heuristic "$(HEURISTIC)" \
 			--outputType $(OUTPUT_TYPE) \
-			--output "data-flow.xml" \
+			--output "control-flow.xml" \
 			--logLevel "$(LOG_LEVEL)" \
 			--projectDir "$(PROJECT_DIR)" \
 			--classesDir "$(CLASSES_DIR)" \

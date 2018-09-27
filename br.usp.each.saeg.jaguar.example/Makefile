@@ -31,27 +31,27 @@ clean_projects:
 # Download, compile and run tests of all projects available in defects4j
 .PHONY:projects
 projects:
-	@echo JFreeChart; \
+	@echo -n Downloading JFreeChart; \
 	defects4j checkout -p Chart -v 1b -w jfreechart; \
 	cd jfreechart && defects4j compile && defects4j test
 
-	@echo Closure; \
+	@echo -n Downloading Closure; \
 	defects4j checkout -p Closure -v 1b -w closure; \
 	cd closure && defects4j compile && defects4j test
 
-	@echo Commons-Lang; \
+	@echo -n Downloading Commons-Lang; \
 	defects4j checkout -p Lang -v 1b -w commons-lang; \
 	cd commons-lang && defects4j compile && defects4j test
 
-	@echo Commons-Math; \
+	@echo -n Downloading Commons-Math; \
 	defects4j checkout -p Math -v 1b -w commons-math; \
 	cd commons-math && defects4j compile && defects4j test
 
-	@echo Mockito; \
+	@echo -n Downloading Mockito; \
 	defects4j checkout -p Mockito -v 1b -w mockito; \
 	cd mockito && defects4j compile && defects4j test
 
-	@echo Time; \
+	@echo -n Downloading JodaTime; \
 	defects4j checkout -p Time -v 1b -w jodatime; \
 	cd jodatime && defects4j compile && defects4j test
 
@@ -66,6 +66,10 @@ jfreechart:
 .PHONY:closure
 closure:
 	@$(MAKE) -f Makefile.jaguar closure &
+
+.PHONY:commons-lang
+commons-lang:
+	@$(MAKE) -f Makefile.jaguar commons-lang &
 
 .PHONY:commons-math
 commons-math:
