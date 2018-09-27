@@ -124,8 +124,8 @@ public class JaguarRunner {
 					         options.isDataFlow(), options.getOutputFileName(), options.getOutputType()).run();
 		}
 		catch (Exception e) {
-			logger.error("Exception :" + e.toString());
-			logger.error("Stacktrace :");
+			logger.error("Exception: " + e.toString());
+			logger.error("Stacktrace: ");
 			e.printStackTrace(System.err);
 			System.exit(1);
 		}

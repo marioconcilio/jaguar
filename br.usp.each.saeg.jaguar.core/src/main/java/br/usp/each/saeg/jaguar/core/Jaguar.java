@@ -90,10 +90,8 @@ public class Jaguar {
 	 *            the coverage data from Jacoco
 	 * @param currentTestFailed
 	 *            result of the test
-	 * @throws IOException
-	 * 
 	 */
-	public void collect(final AbstractExecutionDataStore executionData, boolean currentTestFailed) throws IOException {
+	public void collect(final AbstractExecutionDataStore executionData, boolean currentTestFailed) {
 		logger.debug("Test # {}", nTests);
 		if (executionData instanceof DataFlowExecutionDataStore) {
 			logger.trace("Collecting DF coverage");
@@ -131,7 +129,7 @@ public class Jaguar {
 
 	}
 
-	private void analyzeCoveredClasses(AbstractExecutionDataStore executionData, AbstractAnalyzer analyzer) throws IOException {
+	private void analyzeCoveredClasses(AbstractExecutionDataStore executionData, AbstractAnalyzer analyzer) {
 		logger.trace("Analyzing covered classes");
 
 		Collection<File> classFiles = classFilesOfStore(executionData);
@@ -140,16 +138,18 @@ public class Jaguar {
 		for (File classFile : classFiles) {
 			logger.trace("Analyzing class {}", classFile.getPath());
 
-			InputStream inputStream = new FileInputStream(classFile);
-            analyzer.analyzeClass(inputStream, classFile.getPath());
-			inputStream.close();
+			try (final InputStream inputStream = new FileInputStream(classFile)) {
+                analyzer.analyzeClass(inputStream, classFile.getPath());
+            }
+            catch (IOException e) {
+                logger.warn("Error when reading file: ", classFile);
+                logger.warn("Exception: {}", e.toString());
+            }
 		}
 	}
 
 	private Collection<File> classFilesOfStore(AbstractExecutionDataStore executionDataStore) {
-		logger.trace("Class files of store");
-
-		Collection<File> result = new ArrayList<File>();
+		Collection<File> result = new ArrayList<>();
 
 		// TODO: create abstract FlowExecutionData so ControlFlow and DataFlow can extend
 		Collection<ControlFlowExecutionData> contents = executionDataStore.getContents();

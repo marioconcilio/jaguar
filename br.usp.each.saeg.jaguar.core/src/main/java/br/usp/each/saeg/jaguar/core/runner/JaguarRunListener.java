@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import br.usp.each.saeg.jaguar.core.JaCoCoClient;
 import br.usp.each.saeg.jaguar.core.Jaguar;
 
+import java.io.IOException;
+
 public class JaguarRunListener extends RunListener {
 
 	private static Logger logger = LoggerFactory.getLogger("JaguarLogger");
@@ -39,8 +41,8 @@ public class JaguarRunListener extends RunListener {
 	@Override
 	public void testFinished(Description description) {
 		printTestResult(description);
+
  		try {
- 			
  			long startTime = System.currentTimeMillis();
  			AbstractExecutionDataStore dataStore = client.read();
  			logger.debug("Time to receive data: {}", System.currentTimeMillis() - startTime);
@@ -48,14 +50,13 @@ public class JaguarRunListener extends RunListener {
  			startTime = System.currentTimeMillis();
 			jaguar.collect(dataStore, currentTestFailed);
 			logger.debug("Time to collect data: {}", System.currentTimeMillis() - startTime);
-			
-		} catch (Exception e) {
+		}
+		catch (IOException e) {
 			logger.error("Exception during collecting coverage information :" + e.toString());
 			logger.error("Exception Message : " + e.getMessage());
 			logger.error("Stacktrace: ");
 			e.printStackTrace(System.err);
 			System.exit(1);
-			// e.printStackTrace();
 		}
 	}
 
